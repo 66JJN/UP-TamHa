@@ -19,6 +19,14 @@ function attachMemoryItem(item) {
   };
 }
 
+function attachSqlCover(row) {
+  const { cover_image_id: coverImageId, cover_image_content_type: coverImageContentType, ...item } = row;
+  return {
+    ...item,
+    images: coverImageId ? [{ id: coverImageId, content_type: coverImageContentType }] : [],
+  };
+}
+
 export async function createProfile({ nickname, avatarKind }) {
   if (isMemory) {
     const profile = { id: randomUUID(), nickname, avatar_kind: avatarKind, created_at: new Date().toISOString() };
@@ -127,10 +135,20 @@ export async function listItems(filters = {}) {
   const result = await request.query(`
     SELECT i.*, p.nickname AS owner_name, p.avatar_kind AS owner_avatar_kind,
       CASE WHEN p.avatar_blob_name IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS owner_has_avatar,
-      (SELECT COUNT(*) FROM item_images im WHERE im.item_id = i.id) AS image_count, COUNT(*) OVER() AS total_count
-    FROM items i JOIN profiles p ON p.id = i.owner_profile_id ${clause}
+      (SELECT COUNT(*) FROM item_images im WHERE im.item_id = i.id) AS image_count,
+      cover.id AS cover_image_id, cover.content_type AS cover_image_content_type,
+      COUNT(*) OVER() AS total_count
+    FROM items i JOIN profiles p ON p.id = i.owner_profile_id
+    OUTER APPLY (
+      SELECT TOP 1 im.id, im.content_type FROM item_images im
+      WHERE im.item_id = i.id ORDER BY im.created_at, im.id
+    ) cover
+    ${clause}
     ORDER BY i.created_at DESC OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY`);
-  return { items: result.recordset.map(({ total_count: _total, ...item }) => item), total: result.recordset[0]?.total_count || 0 };
+  return {
+    items: result.recordset.map(({ total_count: _total, ...row }) => attachSqlCover(row)),
+    total: result.recordset[0]?.total_count || 0,
+  };
 }
 
 export async function getItemById(id) {
@@ -195,9 +213,15 @@ export async function listItemsByProfile(profileId) {
   const result = await pool.request().input('profileId', sql.UniqueIdentifier, profileId).query(`
     SELECT i.*, p.nickname AS owner_name, p.avatar_kind AS owner_avatar_kind,
       CASE WHEN p.avatar_blob_name IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS owner_has_avatar,
-      (SELECT COUNT(*) FROM item_images im WHERE im.item_id = i.id) AS image_count
-    FROM items i JOIN profiles p ON p.id = i.owner_profile_id WHERE i.owner_profile_id = @profileId ORDER BY i.created_at DESC`);
-  return result.recordset;
+      (SELECT COUNT(*) FROM item_images im WHERE im.item_id = i.id) AS image_count,
+      cover.id AS cover_image_id, cover.content_type AS cover_image_content_type
+    FROM items i JOIN profiles p ON p.id = i.owner_profile_id
+    OUTER APPLY (
+      SELECT TOP 1 im.id, im.content_type FROM item_images im
+      WHERE im.item_id = i.id ORDER BY im.created_at, im.id
+    ) cover
+    WHERE i.owner_profile_id = @profileId ORDER BY i.created_at DESC`);
+  return result.recordset.map(attachSqlCover);
 }
 
 export async function createClaim(itemId, profileId, proofDetails) {

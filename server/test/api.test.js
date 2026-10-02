@@ -1,6 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import app from '../src/app.js';
+
+// Tests are deterministic and must never connect to production Azure resources.
+process.env.AZURE_SQL_CONNECTION_STRING = '';
+process.env.AZURE_STORAGE_CONNECTION_STRING = '';
+const { default: app } = await import('../src/app.js');
 
 async function withServer(run) {
   const server = await new Promise((resolve) => {

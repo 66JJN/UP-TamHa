@@ -34,7 +34,7 @@
 .item-card { overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); transition: transform 180ms ease, box-shadow 180ms ease; }
 .item-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .item-card-visual { position: relative; display: block; height: 190px; overflow: hidden; }
-.item-photo { width: 100%; height: 100%; object-fit: cover; }
+.item-photo { width: 100%; height: 100%; object-fit: contain; background: #f4f0f6; }
 .item-placeholder { width: 100%; height: 100%; display: grid; place-items: center; background: var(--purple-50); color: var(--purple-600); }
 .item-placeholder svg { width: 60px; height: 60px; }
 .category-found { background: #eef7f2; color: var(--success); }
