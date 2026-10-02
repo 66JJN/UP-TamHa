@@ -1,0 +1,72 @@
+.site-header { position: sticky; z-index: 50; top: 0; background: rgba(255, 255, 255, 0.94); border-bottom: 1px solid rgba(230, 224, 232, 0.85); backdrop-filter: blur(14px); }
+.header-inner { height: 74px; display: flex; align-items: center; justify-content: space-between; }
+.brand { display: inline-flex; align-items: center; gap: 11px; }
+.brand-mark { width: 42px; height: 42px; display: grid; place-items: center; color: white; background: var(--purple-700); border-bottom: 4px solid var(--gold-500); border-radius: 9px; font-size: 0.88rem; font-weight: 700; }
+.brand > span:last-child { display: grid; line-height: 1.2; }
+.brand strong { font-size: 1.05rem; }
+.brand small { margin-top: 4px; color: var(--muted); font-size: 0.7rem; }
+.main-nav { display: flex; align-items: center; gap: 24px; }
+.main-nav > a:not(.button) { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 0.9rem; font-weight: 600; }
+.main-nav > a.active:not(.button), .main-nav > a:hover:not(.button) { color: var(--purple-700); }
+.nav-profile { display: inline-flex; align-items: center; gap: 8px; max-width: 150px; }
+.nav-profile span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-avatar { display: block; flex: 0 0 auto; object-fit: cover; background: var(--purple-50); border: 2px solid white; border-radius: 50%; box-shadow: 0 0 0 1px var(--line); }
+.profile-avatar-small { width: 32px; height: 32px; }
+.profile-avatar-medium { width: 46px; height: 46px; }
+.profile-avatar-large { width: 64px; height: 64px; }
+.icon-button { width: 42px; height: 42px; display: grid; place-items: center; color: var(--ink); background: var(--purple-50); border-radius: 9px; cursor: pointer; }
+.menu-button { display: none; }
+.site-footer { margin-top: auto; color: rgba(255, 255, 255, 0.84); background: var(--purple-950); }
+.footer-inner { min-height: 150px; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+.footer-inner strong { color: white; font-size: 1.12rem; }
+.footer-inner p { margin: 3px 0 0; color: rgba(255, 255, 255, 0.58); }
+.footer-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; font-size: 0.78rem; }
+.footer-meta a { color: var(--gold-100); }
+.status-badge, .report-badge { display: inline-flex; align-items: center; width: fit-content; padding: 5px 9px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; line-height: 1.2; }
+.report-badge { position: absolute; top: 12px; left: 12px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+.report-lost { background: var(--danger); }
+.report-found { background: var(--success); }
+.status-open { color: var(--success); background: var(--success-soft); }
+.status-claim_pending, .claim-pending { color: var(--warning); background: var(--warning-soft); }
+.status-matched { color: var(--purple-700); background: var(--purple-100); }
+.status-returned, .claim-approved { color: #285b75; background: #e5f1f7; }
+.status-closed, .claim-rejected { color: var(--muted); background: #efedf0; }
+.item-card { overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); transition: transform 180ms ease, box-shadow 180ms ease; }
+.item-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.item-card-visual { position: relative; display: block; height: 190px; overflow: hidden; }
+.item-photo { width: 100%; height: 100%; object-fit: cover; }
+.item-placeholder { width: 100%; height: 100%; display: grid; place-items: center; background: var(--purple-50); color: var(--purple-600); }
+.item-placeholder svg { width: 60px; height: 60px; }
+.category-found { background: #eef7f2; color: var(--success); }
+.item-card-body { position: relative; padding: 18px; }
+.item-card-status { position: absolute; top: 18px; right: 18px; }
+.item-card-title { display: block; max-width: calc(100% - 94px); margin-bottom: 8px; overflow: hidden; font-size: 1.02rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.item-card-title:hover { color: var(--purple-700); }
+.item-card-description { min-height: 43px; margin-bottom: 16px; display: -webkit-box; overflow: hidden; color: var(--muted); font-size: 0.84rem; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.item-card-meta { display: grid; gap: 7px; margin: 0; }
+.item-card-meta div { display: grid; grid-template-columns: 18px 38px 1fr; align-items: center; gap: 5px; color: var(--muted); font-size: 0.77rem; }
+.item-card-meta svg { color: var(--purple-600); }
+.item-card-meta dt { color: #928b94; }
+.item-card-meta dd { margin: 0; overflow: hidden; color: var(--ink); text-overflow: ellipsis; white-space: nowrap; }
+.form-field { display: grid; gap: 7px; }
+.field-label { font-size: 0.88rem; font-weight: 700; }
+.field-label span { color: var(--danger); }
+.form-field input, .form-field select, .form-field textarea, .search-panel input, .search-panel select, .claim-form-wrap textarea { width: 100%; color: var(--ink); background: white; border: 1px solid #d9d1dc; border-radius: var(--radius-sm); outline: none; }
+.form-field input, .form-field select { min-height: 46px; padding: 9px 12px; }
+.form-field textarea, .claim-form-wrap textarea { padding: 11px 12px; resize: vertical; }
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus, .search-panel input:focus, .search-panel select:focus, .claim-form-wrap textarea:focus { border-color: var(--purple-600); box-shadow: 0 0 0 3px rgba(113, 54, 149, 0.1); }
+.field-hint, .field-error { font-size: 0.75rem; }
+.field-hint { color: var(--muted); }
+.field-error { color: var(--danger); }
+.has-error input, .has-error textarea, .has-error select { border-color: var(--danger); }
+.empty-state { grid-column: 1/-1; padding: 56px 20px; color: var(--muted); background: white; border: 1px dashed #d6cddd; border-radius: var(--radius-md); text-align: center; }
+.empty-state svg { color: var(--purple-600); }
+.empty-state h3 { margin: 12px 0 4px; color: var(--ink); }
+.empty-state p { margin: 0; font-size: 0.9rem; }
+.skeleton-card { overflow: hidden; background: white; border: 1px solid var(--line); border-radius: var(--radius-md); }
+.skeleton-card > span { display: block; height: 190px; background: #f0edf2; }
+.skeleton-card > div { display: grid; gap: 10px; padding: 18px; }
+.skeleton-card i { height: 12px; background: #f0edf2; border-radius: 4px; animation: pulse 1.4s ease-in-out infinite; }
+.skeleton-card i:nth-child(2) { width: 76%; }.skeleton-card i:nth-child(3) { width: 54%; }
+@keyframes pulse { 50% { opacity: 0.45; } }
+

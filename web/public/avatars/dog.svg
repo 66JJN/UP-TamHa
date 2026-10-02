@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title">
+  <title id="title">รูปโปรไฟล์หมา</title>
+  <rect width="160" height="160" rx="80" fill="#eee5f4"/>
+  <path d="M50 56C55 42 66 35 80 35s25 7 30 21c19 0 30 15 24 37l-12 30c-5 17-20 25-42 25s-37-8-42-25L26 93c-6-22 5-37 24-37Z" fill="#fff" stroke="#58266f" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M49 57 29 47c-8 19-6 35 5 48M111 57l20-10c8 19 6 35-5 48" fill="#c9a642" stroke="#58266f" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="61" cy="91" r="6" fill="#58266f"/><circle cx="99" cy="91" r="6" fill="#58266f"/>
+  <path d="M72 108q8-8 16 0c0 8-4 12-8 12s-8-4-8-12Zm8 12v8" fill="#c49a2c" stroke="#58266f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
