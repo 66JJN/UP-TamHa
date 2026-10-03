@@ -5,25 +5,49 @@ const ProfileContext = createContext(null);
 
 export function ProfileProvider({ children }) {
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(Boolean(getProfileId()));
+  const [authMethod, setAuthMethod] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const id = getProfileId();
-    if (!id) return;
-    api(`/profiles/${id}`)
-      .then(({ profile: saved }) => setProfile(saved))
-      .catch(() => setProfileId(null))
-      .finally(() => setLoading(false));
+    async function restoreProfile() {
+      try {
+        const { profile: saved } = await api('/auth/me');
+        setProfile(saved); setAuthMethod('session'); setProfileId(null);
+      } catch {
+        const id = getProfileId();
+        if (!id) return;
+        try {
+          const { profile: saved } = await api(`/profiles/${id}`);
+          setProfile(saved); setAuthMethod('legacy');
+        } catch { setProfileId(null); }
+      } finally { setLoading(false); }
+    }
+    restoreProfile();
   }, []);
+
+  async function register({ nickname, username, password }) {
+    const { profile: saved } = await api('/auth/register', { method: 'POST', body: JSON.stringify({ nickname, username, password }) });
+    setProfileId(null); setProfile(saved); setAuthMethod('session');
+    return saved;
+  }
+
+  async function login({ username, password }) {
+    const { profile: saved } = await api('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+    setProfileId(null); setProfile(saved); setAuthMethod('session');
+    return saved;
+  }
+
+  async function upgradeLegacy({ username, password }) {
+    const { profile: saved } = await api('/auth/upgrade', { method: 'POST', body: JSON.stringify({ username, password }) });
+    setProfileId(null); setProfile(saved); setAuthMethod('session');
+    return saved;
+  }
 
   async function saveProfile({ nickname, avatarKind, avatarFile }) {
     let saved;
     if (profile) {
       ({ profile: saved } = await api(`/profiles/${profile.id}`, { method: 'PATCH', body: JSON.stringify({ nickname, avatarKind }) }));
-    } else {
-      ({ profile: saved } = await api('/profiles', { method: 'POST', body: JSON.stringify({ nickname, avatarKind }) }));
-      setProfileId(saved.id);
-    }
+    } else throw new Error('กรุณาสร้างบัญชีหรือเข้าสู่ระบบก่อน');
     if (avatarFile) {
       const upload = new FormData();
       upload.append('avatar', avatarFile);
@@ -33,12 +57,16 @@ export function ProfileProvider({ children }) {
     return saved;
   }
 
-  function clearProfile() {
+  async function logout() {
+    try { await api('/auth/logout', { method: 'POST' }); } catch { /* Clear local state even if the session already expired. */ }
     setProfileId(null);
     setProfile(null);
+    setAuthMethod(null);
   }
 
-  const value = useMemo(() => ({ profile, loading, saveProfile, clearProfile }), [profile, loading]);
+  const value = useMemo(() => ({
+    profile, loading, authMethod, register, login, upgradeLegacy, saveProfile, logout,
+  }), [profile, loading, authMethod]);
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }
 

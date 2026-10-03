@@ -4,12 +4,17 @@
 erDiagram
     PROFILES ||--o{ ITEMS : reports
     PROFILES ||--o{ CLAIMS : submits
+    PROFILES ||--o{ SESSIONS : authenticates
+    PROFILES ||--o{ CLAIM_MESSAGES : sends
     ITEMS ||--o{ CLAIMS : receives
+    CLAIMS ||--o{ CLAIM_MESSAGES : contains
     ITEMS ||--o{ ITEM_IMAGES : contains
 
     PROFILES {
       uuid id PK
       string nickname
+      string username UK
+      string password_hash
       string avatar_kind
       string avatar_blob_name
     }
@@ -30,6 +35,18 @@ erDiagram
       uuid claimant_profile_id FK
       string proof_details
       string status
+    }
+    CLAIM_MESSAGES {
+      uuid id PK
+      uuid claim_id FK
+      uuid sender_profile_id FK
+      string message
+      datetime created_at
+    }
+    SESSIONS {
+      string token_hash PK
+      uuid profile_id FK
+      datetime expires_at
     }
     ITEM_IMAGES {
       uuid id PK

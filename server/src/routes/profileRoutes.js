@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { asyncRoute, AppError } from '../lib/errors.js';
-import { createProfile, getProfileAvatarRecord, getProfileById, setProfileAvatar, updateProfile } from '../repositories/appRepository.js';
+import { requireProfile } from '../middleware/profile.js';
+import { getProfileAvatarRecord, getProfileById, setProfileAvatar, updateProfile } from '../repositories/appRepository.js';
 import { openObject, saveObject } from '../storage/objectStorage.js';
 
 const router = Router();
@@ -18,12 +19,6 @@ function assertUuid(value) {
   if (!uuidPattern.test(value)) throw new AppError(400, 'invalid_id', 'รหัสโปรไฟล์ไม่ถูกต้อง');
 }
 
-router.post('/', asyncRoute(async (req, res) => {
-  const avatarKind = ['CAT', 'DOG'].includes(req.body?.avatarKind) ? req.body.avatarKind : 'CAT';
-  const profile = await createProfile({ nickname: validateNickname(req.body?.nickname), avatarKind });
-  res.status(201).json({ profile });
-}));
-
 router.get('/:id', asyncRoute(async (req, res) => {
   assertUuid(req.params.id);
   const profile = await getProfileById(req.params.id);
@@ -31,16 +26,18 @@ router.get('/:id', asyncRoute(async (req, res) => {
   res.json({ profile });
 }));
 
-router.patch('/:id', asyncRoute(async (req, res) => {
+router.patch('/:id', requireProfile, asyncRoute(async (req, res) => {
   assertUuid(req.params.id);
+  if (req.profile.id !== req.params.id) throw new AppError(403, 'not_profile_owner', 'แก้ไขได้เฉพาะโปรไฟล์ของตนเอง');
   const changes = {};
   if (req.body.nickname !== undefined) changes.nickname = validateNickname(req.body.nickname);
   if (['CAT', 'DOG'].includes(req.body.avatarKind)) changes.avatar_kind = req.body.avatarKind;
   res.json({ profile: await updateProfile(req.params.id, changes) });
 }));
 
-router.post('/:id/avatar', upload.single('avatar'), asyncRoute(async (req, res) => {
+router.post('/:id/avatar', requireProfile, upload.single('avatar'), asyncRoute(async (req, res) => {
   assertUuid(req.params.id);
+  if (req.profile.id !== req.params.id) throw new AppError(403, 'not_profile_owner', 'แก้ไขได้เฉพาะโปรไฟล์ของตนเอง');
   if (!req.file) throw new AppError(400, 'avatar_required', 'กรุณาเลือกรูปโปรไฟล์');
   const stored = await saveObject(req.file);
   res.json({ profile: await setProfileAvatar(req.params.id, stored.blobName, req.file.mimetype, stored.localPath) });

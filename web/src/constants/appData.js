@@ -38,8 +38,8 @@ export const STATUS_LABELS = {
 
 export const CLAIM_STATUS_LABELS = {
   PENDING: 'รอตรวจสอบ',
-  APPROVED: 'อนุมัติแล้ว',
-  REJECTED: 'ไม่ผ่านการตรวจสอบ',
+  APPROVED: 'ยืนยันแล้ว',
+  REJECTED: 'ปฏิเสธแล้ว',
 };
 
 export const REPORT_LABELS = { LOST: 'ตามหาของหาย', FOUND: 'พบของ' };

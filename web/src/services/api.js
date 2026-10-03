@@ -15,7 +15,7 @@ export async function api(path, options = {}) {
   const profileId = getProfileId();
   if (profileId) headers.set('X-Profile-Id', profileId);
   if (options.body && !(options.body instanceof FormData)) headers.set('Content-Type', 'application/json');
-  const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const response = await fetch(`${API_BASE}${path}`, { credentials: 'include', ...options, headers });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
     const error = new Error(body.message || 'ไม่สามารถเชื่อมต่อระบบได้');

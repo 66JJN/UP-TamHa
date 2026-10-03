@@ -22,7 +22,7 @@
 @media (max-width: 430px) {
   .hero-copy h1 { font-size: 2.35rem; }.hero-actions { align-items: stretch; flex-direction: column; gap: 14px; }.hero-actions .text-link { justify-content: center; }
   .search-panel { grid-template-columns: 1fr; }.search-input-wrap, .search-panel .button { grid-column: auto; }
-  .detail-visual { height: 285px; }.detail-page { padding-top: 34px; }.claim-actions { flex-direction: column; }.claim-actions .button { width: 100%; }
+  .detail-visual { height: 285px; }.detail-page { padding-top: 34px; }.claim-actions { flex-direction: column; }.claim-actions .button { width: 100%; }.claim-card { padding: 16px; }.claim-message { width: 94%; }.reply-form > div { grid-template-columns: 1fr; }.reply-form .button { width: 100%; }
   .avatar-options { grid-template-columns: 1fr 1fr; }.avatar-upload { grid-column: 1/-1; }
 }
 

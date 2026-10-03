@@ -6,12 +6,28 @@ BEGIN
   CREATE TABLE profiles (
     id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
     nickname NVARCHAR(60) NOT NULL,
+    username NVARCHAR(40) NULL,
+    password_hash NVARCHAR(255) NULL,
     avatar_kind NVARCHAR(10) NOT NULL DEFAULT 'CAT',
     avatar_blob_name NVARCHAR(500) NULL,
     avatar_content_type NVARCHAR(100) NULL,
     created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
     CONSTRAINT ck_profiles_avatar_kind CHECK (avatar_kind IN ('CAT', 'DOG', 'CUSTOM'))
   );
+  CREATE UNIQUE INDEX ux_profiles_username ON profiles (username) WHERE username IS NOT NULL;
+END;
+
+IF OBJECT_ID('sessions', 'U') IS NULL
+BEGIN
+  CREATE TABLE sessions (
+    token_hash CHAR(64) NOT NULL PRIMARY KEY,
+    profile_id UNIQUEIDENTIFIER NOT NULL,
+    expires_at DATETIME2 NOT NULL,
+    created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT fk_sessions_profile FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+  );
+  CREATE INDEX ix_sessions_profile ON sessions (profile_id, expires_at);
+  CREATE INDEX ix_sessions_expiry ON sessions (expires_at);
 END;
 
 IF OBJECT_ID('items', 'U') IS NULL
@@ -54,6 +70,20 @@ BEGIN
     CONSTRAINT ck_claims_status CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED'))
   );
   CREATE INDEX ix_claims_item ON claims (item_id, created_at DESC);
+END;
+
+IF OBJECT_ID('claim_messages', 'U') IS NULL
+BEGIN
+  CREATE TABLE claim_messages (
+    id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    claim_id UNIQUEIDENTIFIER NOT NULL,
+    sender_profile_id UNIQUEIDENTIFIER NOT NULL,
+    message NVARCHAR(1500) NOT NULL,
+    created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT fk_claim_messages_claim FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE,
+    CONSTRAINT fk_claim_messages_sender FOREIGN KEY (sender_profile_id) REFERENCES profiles(id)
+  );
+  CREATE INDEX ix_claim_messages_claim ON claim_messages (claim_id, created_at, id);
 END;
 
 IF OBJECT_ID('item_images', 'U') IS NULL

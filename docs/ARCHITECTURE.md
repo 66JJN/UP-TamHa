@@ -15,8 +15,9 @@ The frontend and API deploy independently, matching the course's W13 deployment 
 ## Trust boundaries
 
 - The browser never receives database or storage credentials.
-- A browser-stored profile ID keeps the mini-project flow short; it is not security authentication.
+- Passwords are stored only as scrypt hashes; opaque login sessions are stored in HttpOnly cookies.
+- A legacy browser-stored profile ID is accepted only so existing profiles can add credentials without losing reports.
 - SQL parameters are bound with the `mssql` driver.
 - Blob containers remain private; images are streamed through the API.
-- Claim proof is returned only on the report-owner route.
+- Claim proof and replies are returned only to the report owner and that claim's author.
 

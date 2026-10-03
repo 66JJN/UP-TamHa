@@ -6,6 +6,7 @@ export const env = {
   sqlConnectionString: process.env.AZURE_SQL_CONNECTION_STRING || '',
   storageConnectionString: process.env.AZURE_STORAGE_CONNECTION_STRING || '',
   storageContainer: process.env.AZURE_STORAGE_CONTAINER || 'up-tamha-items',
+  nodeEnv: process.env.NODE_ENV || 'development',
 };
 
 export const dataMode = env.sqlConnectionString ? 'azure-sql' : 'memory';

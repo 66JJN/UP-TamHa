@@ -1,4 +1,5 @@
 .site-header { position: sticky; z-index: 50; top: 0; background: rgba(255, 255, 255, 0.94); border-bottom: 1px solid rgba(230, 224, 232, 0.85); backdrop-filter: blur(14px); }
+.legacy-account-banner { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 9px 20px; color: #6d531b; background: var(--warning-soft); font-size: .8rem; }.legacy-account-banner a { color: var(--purple-700); font-weight: 700; text-decoration: underline; }
 .header-inner { height: 74px; display: flex; align-items: center; justify-content: space-between; }
 .brand { display: inline-flex; align-items: center; gap: 11px; }
 .brand-mark { width: 42px; height: 42px; display: grid; place-items: center; color: white; background: var(--purple-700); border-bottom: 4px solid var(--gold-500); border-radius: 9px; font-size: 0.88rem; font-weight: 700; }
@@ -51,10 +52,10 @@
 .form-field { display: grid; gap: 7px; }
 .field-label { font-size: 0.88rem; font-weight: 700; }
 .field-label span { color: var(--danger); }
-.form-field input, .form-field select, .form-field textarea, .search-panel input, .search-panel select, .claim-form-wrap textarea { width: 100%; color: var(--ink); background: white; border: 1px solid #d9d1dc; border-radius: var(--radius-sm); outline: none; }
+.form-field input, .form-field select, .form-field textarea, .search-panel input, .search-panel select, .claim-form-wrap textarea, .reply-form textarea { width: 100%; color: var(--ink); background: white; border: 1px solid #d9d1dc; border-radius: var(--radius-sm); outline: none; }
 .form-field input, .form-field select { min-height: 46px; padding: 9px 12px; }
-.form-field textarea, .claim-form-wrap textarea { padding: 11px 12px; resize: vertical; }
-.form-field input:focus, .form-field select:focus, .form-field textarea:focus, .search-panel input:focus, .search-panel select:focus, .claim-form-wrap textarea:focus { border-color: var(--purple-600); box-shadow: 0 0 0 3px rgba(113, 54, 149, 0.1); }
+.form-field textarea, .claim-form-wrap textarea, .reply-form textarea { padding: 11px 12px; resize: vertical; }
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus, .search-panel input:focus, .search-panel select:focus, .claim-form-wrap textarea:focus, .reply-form textarea:focus { border-color: var(--purple-600); box-shadow: 0 0 0 3px rgba(113, 54, 149, 0.1); }
 .field-hint, .field-error { font-size: 0.75rem; }
 .field-hint { color: var(--muted); }
 .field-error { color: var(--danger); }

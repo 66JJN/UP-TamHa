@@ -27,33 +27,107 @@ function attachSqlCover(row) {
   };
 }
 
-export async function createProfile({ nickname, avatarKind }) {
+function profileView(profile) {
+  if (!profile) return null;
+  const { password_hash: _passwordHash, username: _username, ...safe } = profile;
+  return { ...safe, has_avatar: Boolean(profile.avatar_blob_name ?? profile.has_avatar), has_credentials: Boolean(profile.password_hash ?? profile.has_credentials) };
+}
+
+export async function createProfile({ nickname, avatarKind, username = null, passwordHash = null }) {
   if (isMemory) {
-    const profile = { id: randomUUID(), nickname, avatar_kind: avatarKind, created_at: new Date().toISOString() };
+    if (username && memoryStore.profiles.some((entry) => entry.username === username)) {
+      const error = new Error('Username already exists'); error.number = 2601; throw error;
+    }
+    const profile = { id: randomUUID(), nickname, username, password_hash: passwordHash, avatar_kind: avatarKind, created_at: new Date().toISOString() };
     memoryStore.profiles.push(profile);
-    return profile;
+    return profileView(profile);
   }
   const pool = await getSqlPool();
   const result = await pool.request()
     .input('nickname', sql.NVarChar(60), nickname)
+    .input('username', sql.NVarChar(40), username)
+    .input('passwordHash', sql.NVarChar(255), passwordHash)
     .input('avatarKind', sql.NVarChar(10), avatarKind)
-    .query(`INSERT INTO profiles (nickname, avatar_kind)
-      OUTPUT INSERTED.id, INSERTED.nickname, INSERTED.avatar_kind, INSERTED.created_at
-      VALUES (@nickname, @avatarKind)`);
-  return result.recordset[0];
+    .query(`INSERT INTO profiles (nickname, username, password_hash, avatar_kind)
+      OUTPUT INSERTED.id, INSERTED.nickname, INSERTED.username, INSERTED.password_hash, INSERTED.avatar_kind, INSERTED.created_at
+      VALUES (@nickname, @username, @passwordHash, @avatarKind)`);
+  return profileView(result.recordset[0]);
 }
 
 export async function getProfileById(id) {
   if (isMemory) {
     const profile = memoryStore.profiles.find((entry) => entry.id === id);
-    return profile ? { ...profile, has_avatar: Boolean(profile.avatar_blob_name) } : null;
+    return profileView(profile);
   }
   const pool = await getSqlPool();
   const result = await pool.request().input('id', sql.UniqueIdentifier, id).query(`
     SELECT id, nickname, avatar_kind, created_at,
-      CASE WHEN avatar_blob_name IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS has_avatar
+      CASE WHEN avatar_blob_name IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS has_avatar,
+      CASE WHEN password_hash IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS has_credentials
     FROM profiles WHERE id = @id`);
   return result.recordset[0] || null;
+}
+
+export async function getAccountByUsername(username) {
+  if (isMemory) return memoryStore.profiles.find((entry) => entry.username === username) || null;
+  const pool = await getSqlPool();
+  const result = await pool.request().input('username', sql.NVarChar(40), username).query(`
+    SELECT id, nickname, username, password_hash, avatar_kind, created_at,
+      CASE WHEN avatar_blob_name IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS has_avatar
+    FROM profiles WHERE username = @username`);
+  return result.recordset[0] || null;
+}
+
+export async function setProfileCredentials(id, username, passwordHash) {
+  if (isMemory) {
+    if (memoryStore.profiles.some((entry) => entry.id !== id && entry.username === username)) {
+      const error = new Error('Username already exists'); error.number = 2601; throw error;
+    }
+    const profile = memoryStore.profiles.find((entry) => entry.id === id);
+    if (!profile) throw new AppError(404, 'profile_not_found', 'ไม่พบโปรไฟล์');
+    Object.assign(profile, { username, password_hash: passwordHash });
+    return profileView(profile);
+  }
+  const pool = await getSqlPool();
+  await pool.request().input('id', sql.UniqueIdentifier, id).input('username', sql.NVarChar(40), username)
+    .input('passwordHash', sql.NVarChar(255), passwordHash)
+    .query('UPDATE profiles SET username = @username, password_hash = @passwordHash WHERE id = @id');
+  return getProfileById(id);
+}
+
+export async function createSession(profileId, tokenHash, expiresAt) {
+  if (isMemory) {
+    memoryStore.sessions.push({ token_hash: tokenHash, profile_id: profileId, expires_at: expiresAt.toISOString() });
+    return;
+  }
+  const pool = await getSqlPool();
+  await pool.request().input('tokenHash', sql.Char(64), tokenHash).input('profileId', sql.UniqueIdentifier, profileId)
+    .input('expiresAt', sql.DateTime2, expiresAt)
+    .query('INSERT INTO sessions (token_hash, profile_id, expires_at) VALUES (@tokenHash, @profileId, @expiresAt)');
+}
+
+export async function getProfileBySession(tokenHash) {
+  if (isMemory) {
+    const session = memoryStore.sessions.find((entry) => entry.token_hash === tokenHash && new Date(entry.expires_at) > new Date());
+    return session ? getProfileById(session.profile_id) : null;
+  }
+  const pool = await getSqlPool();
+  const result = await pool.request().input('tokenHash', sql.Char(64), tokenHash).query(`
+    SELECT p.id, p.nickname, p.avatar_kind, p.created_at,
+      CASE WHEN p.avatar_blob_name IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS has_avatar,
+      CAST(1 AS BIT) AS has_credentials
+    FROM sessions s JOIN profiles p ON p.id = s.profile_id
+    WHERE s.token_hash = @tokenHash AND s.expires_at > SYSUTCDATETIME()`);
+  return result.recordset[0] || null;
+}
+
+export async function deleteSession(tokenHash) {
+  if (isMemory) {
+    memoryStore.sessions = memoryStore.sessions.filter((entry) => entry.token_hash !== tokenHash);
+    return;
+  }
+  const pool = await getSqlPool();
+  await pool.request().input('tokenHash', sql.Char(64), tokenHash).query('DELETE FROM sessions WHERE token_hash = @tokenHash');
 }
 
 export async function updateProfile(id, changes) {
@@ -67,7 +141,7 @@ export async function updateProfile(id, changes) {
       delete profile.avatar_content_type;
       delete profile.avatar_local_path;
     }
-    return { ...profile, has_avatar: Boolean(profile.avatar_blob_name) };
+    return profileView(profile);
   }
   const pool = await getSqlPool();
   const request = pool.request().input('id', sql.UniqueIdentifier, id);
@@ -86,7 +160,7 @@ export async function setProfileAvatar(id, blobName, contentType, localPath = nu
     const profile = memoryStore.profiles.find((entry) => entry.id === id);
     if (!profile) throw new AppError(404, 'profile_not_found', 'ไม่พบโปรไฟล์');
     Object.assign(profile, { avatar_kind: 'CUSTOM', avatar_blob_name: blobName, avatar_content_type: contentType, avatar_local_path: localPath });
-    return { ...profile, has_avatar: true };
+    return profileView(profile);
   }
   const pool = await getSqlPool();
   await pool.request().input('id', sql.UniqueIdentifier, id)
@@ -249,29 +323,95 @@ export async function createClaim(itemId, profileId, proofDetails) {
 function attachClaim(claim) {
   const profile = memoryStore.profiles.find((entry) => entry.id === claim.claimant_profile_id);
   const item = memoryStore.items.find((entry) => entry.id === claim.item_id);
-  return { ...claim, claimant_name: profile?.nickname, item_title: item?.title };
+  const messages = memoryStore.claimMessages
+    .filter((message) => message.claim_id === claim.id)
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    .map((message) => ({
+      ...message,
+      sender_name: memoryStore.profiles.find((entry) => entry.id === message.sender_profile_id)?.nickname,
+    }));
+  return { ...claim, claimant_name: profile?.nickname, item_title: item?.title, messages };
+}
+
+async function attachSqlClaimMessages(pool, claims) {
+  if (!claims.length) return claims;
+  const request = pool.request();
+  const placeholders = claims.map((claim, index) => {
+    const name = `claimId${index}`;
+    request.input(name, sql.UniqueIdentifier, claim.id);
+    return `@${name}`;
+  });
+  const result = await request.query(`
+    SELECT m.id, m.claim_id, m.sender_profile_id, m.message, m.created_at,
+      p.nickname AS sender_name
+    FROM claim_messages m JOIN profiles p ON p.id = m.sender_profile_id
+    WHERE m.claim_id IN (${placeholders.join(', ')})
+    ORDER BY m.created_at, m.id`);
+  return claims.map((claim) => ({
+    ...claim,
+    messages: result.recordset.filter((message) => String(message.claim_id) === String(claim.id)),
+  }));
 }
 
 export async function listClaimsForItem(itemId, profileId) {
   const item = await getItemById(itemId);
   if (!item) throw new AppError(404, 'item_not_found', 'ไม่พบประกาศ');
-  if (String(item.owner_profile_id) !== profileId) throw new AppError(403, 'not_item_owner', 'ดูคำขอได้เฉพาะเจ้าของประกาศ');
-  if (isMemory) return memoryStore.claims.filter((claim) => claim.item_id === itemId).map(attachClaim);
+  const isOwner = String(item.owner_profile_id) === profileId;
+  if (isMemory) {
+    return memoryStore.claims
+      .filter((claim) => claim.item_id === itemId && (isOwner || claim.claimant_profile_id === profileId))
+      .map(attachClaim);
+  }
   const pool = await getSqlPool();
-  const result = await pool.request().input('itemId', sql.UniqueIdentifier, itemId).query(`
+  const request = pool.request().input('itemId', sql.UniqueIdentifier, itemId);
+  const viewerClause = isOwner ? '' : 'AND c.claimant_profile_id = @profileId';
+  if (!isOwner) request.input('profileId', sql.UniqueIdentifier, profileId);
+  const result = await request.query(`
     SELECT c.*, p.nickname AS claimant_name, i.title AS item_title FROM claims c
     JOIN profiles p ON p.id = c.claimant_profile_id JOIN items i ON i.id = c.item_id
-    WHERE c.item_id = @itemId ORDER BY c.created_at DESC`);
-  return result.recordset;
+    WHERE c.item_id = @itemId ${viewerClause} ORDER BY c.created_at DESC`);
+  return attachSqlClaimMessages(pool, result.recordset);
 }
 
 export async function listClaimsByProfile(profileId) {
   if (isMemory) return memoryStore.claims.filter((claim) => claim.claimant_profile_id === profileId).map(attachClaim);
   const pool = await getSqlPool();
   const result = await pool.request().input('profileId', sql.UniqueIdentifier, profileId).query(`
-    SELECT c.id, c.item_id, c.status, c.created_at, c.reviewed_at, i.title AS item_title
-    FROM claims c JOIN items i ON i.id = c.item_id WHERE c.claimant_profile_id = @profileId ORDER BY c.created_at DESC`);
-  return result.recordset;
+    SELECT c.*, p.nickname AS claimant_name, i.title AS item_title
+    FROM claims c JOIN profiles p ON p.id = c.claimant_profile_id JOIN items i ON i.id = c.item_id
+    WHERE c.claimant_profile_id = @profileId ORDER BY c.created_at DESC`);
+  return attachSqlClaimMessages(pool, result.recordset);
+}
+
+export async function sendClaimMessage(claimId, profileId, message) {
+  if (isMemory) {
+    const claim = memoryStore.claims.find((entry) => entry.id === claimId);
+    if (!claim) throw new AppError(404, 'claim_not_found', 'ไม่พบคำขอ');
+    const item = memoryStore.items.find((entry) => entry.id === claim.item_id);
+    if (![claim.claimant_profile_id, item.owner_profile_id].includes(profileId)) {
+      throw new AppError(403, 'not_claim_participant', 'ตอบกลับได้เฉพาะผู้ยื่นคำขอและเจ้าของประกาศ');
+    }
+    const created = { id: randomUUID(), claim_id: claimId, sender_profile_id: profileId, message, created_at: new Date().toISOString() };
+    memoryStore.claimMessages.push(created);
+    return { ...created, sender_name: memoryStore.profiles.find((entry) => entry.id === profileId)?.nickname };
+  }
+  const pool = await getSqlPool();
+  const targetResult = await pool.request().input('claimId', sql.UniqueIdentifier, claimId).query(`
+    SELECT c.claimant_profile_id, i.owner_profile_id
+    FROM claims c JOIN items i ON i.id = c.item_id WHERE c.id = @claimId`);
+  const target = targetResult.recordset[0];
+  if (!target) throw new AppError(404, 'claim_not_found', 'ไม่พบคำขอ');
+  if (![String(target.claimant_profile_id), String(target.owner_profile_id)].includes(profileId)) {
+    throw new AppError(403, 'not_claim_participant', 'ตอบกลับได้เฉพาะผู้ยื่นคำขอและเจ้าของประกาศ');
+  }
+  const result = await pool.request()
+    .input('claimId', sql.UniqueIdentifier, claimId)
+    .input('profileId', sql.UniqueIdentifier, profileId)
+    .input('message', sql.NVarChar(1500), message)
+    .query(`INSERT INTO claim_messages (claim_id, sender_profile_id, message)
+      OUTPUT INSERTED.id, INSERTED.claim_id, INSERTED.sender_profile_id, INSERTED.message, INSERTED.created_at
+      VALUES (@claimId, @profileId, @message)`);
+  return { ...result.recordset[0], sender_name: (await getProfileById(profileId)).nickname };
 }
 
 export async function reviewClaim(claimId, profileId, decision) {

@@ -30,7 +30,7 @@ export default function Header() {
               <Link className="nav-profile" to="/profile" onClick={close}><ProfileAvatar profile={profile} size="small" /><span>{profile.nickname}</span></Link>
             </>
           ) : (
-            <Link className="button button-primary button-small" to="/profile" onClick={close}>ตั้งชื่อเล่น</Link>
+            <Link className="button button-primary button-small" to="/profile" onClick={close}>เข้าสู่ระบบ</Link>
           )}
         </nav>
       </div>

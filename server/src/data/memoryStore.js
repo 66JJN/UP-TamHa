@@ -18,5 +18,7 @@ export const memoryStore = {
   claims: [
     { id: '30000000-0000-4000-8000-000000000001', item_id: '20000000-0000-4000-8000-000000000003', claimant_profile_id: '10000000-0000-4000-8000-000000000003', proof_details: 'สามารถระบุยี่ห้อและตำแหน่งรอยบนเคสได้', status: 'PENDING', created_at: dateBefore(1), reviewed_at: null },
   ],
+  claimMessages: [],
+  sessions: [],
   images: [],
 };
