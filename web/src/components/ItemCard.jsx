@@ -2,6 +2,7 @@ import { Building2, CalendarDays, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ItemVisual from './ItemVisual.jsx';
 import { ReportBadge, StatusBadge } from './StatusBadge.jsx';
+import { locationLabel } from '../constants/appData.js';
 
 const shortDate = new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
 
@@ -17,7 +18,7 @@ export default function ItemCard({ item }) {
         <Link className="item-card-title" to={`/items/${item.id}`}>{item.title}</Link>
         <p className="item-card-description">{item.description}</p>
         <dl className="item-card-meta">
-          <div><Building2 size={16} /><dt>ตึก</dt><dd>{item.building_code}</dd></div>
+          <div><Building2 size={16} /><dt>ที่หลัก</dt><dd>{locationLabel(item.building_code)}</dd></div>
           <div><MapPin size={16} /><dt>จุด</dt><dd>{item.room}</dd></div>
           <div><CalendarDays size={16} /><dt>วันที่</dt><dd>{shortDate.format(new Date(item.event_date))}</dd></div>
         </dl>

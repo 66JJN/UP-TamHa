@@ -4,7 +4,7 @@
   .main-nav.is-open { display: flex; }.main-nav > a:not(.button) { padding: 11px 4px; }.main-nav .button { margin-top: 5px; }.nav-profile { max-width: none; }
   .hero-grid { gap: 40px; }.search-panel { grid-template-columns: 2fr 1fr 1fr; }.search-panel select:nth-of-type(3) { grid-column: 1/2; }.search-panel .button { grid-column: 3/4; }
   .items-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .form-page-grid { grid-template-columns: 1fr; }.form-aside { position: static; grid-row: 1; }.detail-grid { gap: 30px; }.detail-visual { height: 430px; }
+  .form-page-grid { grid-template-columns: 1fr; }.form-aside { position: static; grid-row: 1; }.detail-grid { gap: 30px; }.detail-visual { height: 430px; }.stat-row { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 720px) {
@@ -16,7 +16,7 @@
   .how-grid { grid-template-columns: 1fr; gap: 36px; }.footer-inner { align-items: flex-start; flex-direction: column; justify-content: center; }.footer-meta { align-items: flex-start; }
   .profile-page { padding: 34px 14px 54px; }.profile-card { grid-template-columns: 1fr; }.profile-card-copy { padding: 28px; }.profile-card-copy h1 { font-size: 1.65rem; }.profile-icon { margin-bottom: 18px; }.profile-form { padding: 28px; }.form-page { padding-top: 38px; }.form-main h1 { font-size: 1.8rem; }.type-selector, .form-row { grid-template-columns: 1fr; }.form-section { padding: 19px; }.submit-button { width: 100%; }.form-aside { padding: 20px; }
   .detail-grid { grid-template-columns: 1fr; }.detail-visual { height: 350px; }.detail-content h1 { font-size: 2.2rem; }.detail-meta { grid-template-columns: 1fr; }.claim-form-wrap { grid-template-columns: 1fr; gap: 16px; padding: 22px; }.claim-form-wrap button { width: 100%; }.login-callout { align-items: flex-start; flex-direction: column; }.login-callout .button { width: 100%; }
-  .dashboard-hero-inner { align-items: flex-start; flex-wrap: wrap; }.dashboard-hero .button { width: 100%; margin: 10px 0 0; }.stat-row { grid-template-columns: 1fr; }.dashboard-row { align-items: flex-start; }.dashboard-row-actions { flex-direction: column-reverse; align-items: flex-end; }.tab-list button { flex: 1; justify-content: center; padding-inline: 8px; }
+  .dashboard-hero-inner { align-items: flex-start; flex-wrap: wrap; }.dashboard-hero .button { width: 100%; margin: 10px 0 0; }.stat-row { grid-template-columns: 1fr; }.dashboard-row { align-items: flex-start; }.dashboard-row-actions { flex-direction: column-reverse; align-items: flex-end; }.tab-list button { flex: 0 0 auto; justify-content: center; padding-inline: 10px; }
 }
 
 @media (max-width: 430px) {

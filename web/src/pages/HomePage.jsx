@@ -51,7 +51,7 @@ export default function HomePage() {
           <div className="hero-copy">
             <span className="eyebrow">ศูนย์รวมของหาย มหาวิทยาลัยพะเยา</span>
             <h1>ของหาย...<br /><em>มาหาที่ TamHa</em></h1>
-            <p>ค้นหาและแจ้งของหายตามตึกเรียนอย่างเป็นระบบ เพื่อให้ของทุกชิ้นมีโอกาสกลับถึงเจ้าของ</p>
+            <p>ค้นหาและแจ้งของหายได้ทั้งในอาคาร รถมหาวิทยาลัย โรงอาหาร ถนน และพื้นที่กลางแจ้ง เพื่อให้ของทุกชิ้นมีโอกาสกลับถึงเจ้าของ</p>
             <div className="hero-actions">
               <Link className="button button-primary" to="/report">ลงประกาศ</Link>
               <a className="text-link" href="#latest">ดูประกาศล่าสุด <ArrowRight size={17} /></a>
@@ -60,7 +60,7 @@ export default function HomePage() {
           <div className="hero-panel" aria-label="วิธีใช้งานโดยย่อ">
             <div className="hero-panel-heading"><span>เลือกจุดที่ทำหาย</span><strong>6 จุดหลัก</strong></div>
             <ol className="building-path">
-              {BUILDINGS.map((building, index) => (
+              {BUILDINGS.filter((building) => building.featured).map((building, index) => (
                 <li key={building.code}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{building.code}</strong><small>{building.name}</small></div></li>
               ))}
             </ol>
@@ -76,8 +76,8 @@ export default function HomePage() {
             <select value={filters.reportType} onChange={(event) => setFilters({ ...filters, reportType: event.target.value })} aria-label="ประเภทประกาศ">
               <option value="">ทุกประเภท</option><option value="LOST">ของหาย</option><option value="FOUND">พบของ</option>
             </select>
-            <select value={filters.building} onChange={(event) => setFilters({ ...filters, building: event.target.value })} aria-label="ตึก">
-              <option value="">ทุกตึก</option>{BUILDINGS.map((building) => <option key={building.code} value={building.code}>{building.code}</option>)}
+            <select value={filters.building} onChange={(event) => setFilters({ ...filters, building: event.target.value })} aria-label="สถานที่หลัก">
+              <option value="">ทุกสถานที่</option>{BUILDINGS.map((building) => <option key={building.code} value={building.code}>{building.code} — {building.name}</option>)}
             </select>
             <select value={filters.category} onChange={(event) => setFilters({ ...filters, category: event.target.value })} aria-label="หมวดหมู่">
               <option value="">ทุกหมวด</option>{CATEGORIES.map((category) => <option key={category}>{category}</option>)}
@@ -103,7 +103,7 @@ export default function HomePage() {
         <div className="container how-grid">
           <div><span className="eyebrow">ใช้งานอย่างมั่นใจ</span><h2>คืนของให้ถูกคน โดยไม่เปิดเผยข้อมูลสำคัญ</h2></div>
           <ul>
-            <li><CheckCircle2 /><span><strong>ประกาศอย่างเป็นระบบ</strong>ระบุตึก ห้อง หมวดหมู่ และวันที่</span></li>
+            <li><CheckCircle2 /><span><strong>ประกาศอย่างเป็นระบบ</strong>ระบุสถานที่ บริเวณ หมวดหมู่ และวันที่</span></li>
             <li><CheckCircle2 /><span><strong>ยืนยันแบบส่วนตัว</strong>รายละเอียดการขอรับเห็นได้เฉพาะผู้เกี่ยวข้อง</span></li>
             <li><CheckCircle2 /><span><strong>ติดตามสถานะได้</strong>รู้ว่ากำลังตามหา ตรวจสอบ หรือส่งคืนแล้ว</span></li>
           </ul>

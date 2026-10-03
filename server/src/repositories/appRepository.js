@@ -383,6 +383,20 @@ export async function listClaimsByProfile(profileId) {
   return attachSqlClaimMessages(pool, result.recordset);
 }
 
+export async function listClaimsForOwnedItems(profileId) {
+  if (isMemory) {
+    const ownedItemIds = new Set(memoryStore.items.filter((item) => item.owner_profile_id === profileId).map((item) => item.id));
+    return memoryStore.claims.filter((claim) => ownedItemIds.has(claim.item_id)).map(attachClaim)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }
+  const pool = await getSqlPool();
+  const result = await pool.request().input('profileId', sql.UniqueIdentifier, profileId).query(`
+    SELECT c.*, p.nickname AS claimant_name, i.title AS item_title
+    FROM claims c JOIN profiles p ON p.id = c.claimant_profile_id JOIN items i ON i.id = c.item_id
+    WHERE i.owner_profile_id = @profileId ORDER BY c.created_at DESC`);
+  return attachSqlClaimMessages(pool, result.recordset);
+}
+
 export async function sendClaimMessage(claimId, profileId, message) {
   if (isMemory) {
     const claim = memoryStore.claims.find((entry) => entry.id === claimId);

@@ -9,7 +9,7 @@ import {
 import { openObject, saveObject } from '../storage/objectStorage.js';
 
 const router = Router();
-const buildings = new Set(['ICT', 'CE', 'PKY', 'UB', 'DOME', 'PYM']);
+const buildings = new Set(['ICT', 'CE', 'PKY', 'UB', 'DOME', 'PYM', 'LIBRARY', 'CANTEEN', 'CAMPUS', 'BUS', 'LAKE', 'SPORT', 'DORM', 'OTHER']);
 const reportTypes = new Set(['LOST', 'FOUND']);
 const statuses = new Set(['OPEN', 'CLAIM_PENDING', 'MATCHED', 'RETURNED', 'CLOSED']);
 const categories = new Set([
@@ -51,7 +51,7 @@ function validateCreate(body) {
   if (data.title.length < 3 || data.title.length > 160) throw new AppError(400, 'invalid_title', 'ชื่อประกาศต้องมี 3–160 ตัวอักษร');
   if (data.description.length < 10 || data.description.length > 2000) throw new AppError(400, 'invalid_description', 'รายละเอียดต้องมี 10–2,000 ตัวอักษร');
   if (!categories.has(data.category)) throw new AppError(400, 'invalid_category', 'หมวดหมู่ไม่ถูกต้อง');
-  if (!buildings.has(data.buildingCode)) throw new AppError(400, 'invalid_building', 'อาคารไม่ถูกต้อง');
+  if (!buildings.has(data.buildingCode)) throw new AppError(400, 'invalid_building', 'สถานที่หลักไม่ถูกต้อง');
   if (!data.room || data.room.length > 100) throw new AppError(400, 'invalid_room', 'กรุณาระบุห้องหรือพื้นที่');
   if (!data.eventDate || Number.isNaN(new Date(data.eventDate).getTime())) throw new AppError(400, 'invalid_event_date', 'วันที่ไม่ถูกต้อง');
   if (new Date(data.eventDate).getTime() > Date.now() + 300000) throw new AppError(400, 'future_event_date', 'วันที่เกิดเหตุต้องไม่เป็นอนาคต');
@@ -95,7 +95,7 @@ router.patch('/:id', requireProfile, asyncRoute(async (req, res) => {
     changes.category = req.body.category;
   }
   if (req.body.buildingCode !== undefined) {
-    if (!buildings.has(req.body.buildingCode)) throw new AppError(400, 'invalid_building', 'อาคารไม่ถูกต้อง');
+    if (!buildings.has(req.body.buildingCode)) throw new AppError(400, 'invalid_building', 'สถานที่หลักไม่ถูกต้อง');
     changes.building_code = req.body.buildingCode;
   }
   if (req.body.room !== undefined) changes.room = String(req.body.room).trim();

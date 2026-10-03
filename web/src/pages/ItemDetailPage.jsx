@@ -6,6 +6,7 @@ import ProfileAvatar from '../components/ProfileAvatar.jsx';
 import { ClaimBadge, ReportBadge, StatusBadge } from '../components/StatusBadge.jsx';
 import { useProfile } from '../context/ProfileContext.jsx';
 import { api } from '../services/api.js';
+import { locationLabel } from '../constants/appData.js';
 
 const fullDate = new Intl.DateTimeFormat('th-TH', { dateStyle: 'long', timeStyle: 'short' });
 
@@ -124,7 +125,7 @@ export default function ItemDetailPage() {
             <h1>{item.title}</h1>
             <p className="detail-description">{item.description}</p>
             <dl className="detail-meta">
-              <div><Building2 /><dt>ตึก</dt><dd>{item.building_code}</dd></div>
+              <div><Building2 /><dt>สถานที่หลัก</dt><dd>{locationLabel(item.building_code)}</dd></div>
               <div><MapPin /><dt>บริเวณ</dt><dd>{item.room}</dd></div>
               <div><CalendarDays /><dt>วันที่เกิดเหตุ</dt><dd>{fullDate.format(new Date(item.event_date))}</dd></div>
               <div><Clock3 /><dt>ลงประกาศ</dt><dd>{fullDate.format(new Date(item.created_at))}</dd></div>

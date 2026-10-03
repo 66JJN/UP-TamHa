@@ -118,7 +118,7 @@ test('create report validates required content', async () => {
   });
 });
 
-test('profile can publish a report at a newly added building', async () => {
+test('profile can publish a report at an outdoor campus location', async () => {
   await withServer(async (baseUrl) => {
     const { profile, cookie } = await registerAccount(baseUrl, 'ฟ้าใส');
     const response = await fetch(`${baseUrl}/api/items`, {
@@ -126,13 +126,13 @@ test('profile can publish a report at a newly added building', async () => {
       headers: { 'Content-Type': 'application/json', Cookie: cookie },
       body: JSON.stringify({
         reportType: 'LOST', title: 'กระเป๋าผ้าสีครีม', description: 'มีสมุดและกล่องดินสออยู่ด้านใน',
-        category: 'กระเป๋าและกระเป๋าสตางค์', buildingCode: 'UB', room: 'พื้นที่ส่วนกลาง',
+        category: 'กระเป๋าและกระเป๋าสตางค์', buildingCode: 'CAMPUS', room: 'ถนนภายในมหาวิทยาลัย',
         eventDate: new Date(Date.now() - 60_000).toISOString(),
       }),
     });
     assert.equal(response.status, 201);
     const { item } = await response.json();
-    assert.equal(item.building_code, 'UB');
+    assert.equal(item.building_code, 'CAMPUS');
     assert.equal(item.owner_profile_id, profile.id);
   });
 });
@@ -159,6 +159,12 @@ test('claim participants can reply and claimant can see the review status', asyn
     });
     assert.equal(claimResponse.status, 201);
     const { claim } = await claimResponse.json();
+
+    const received = await fetch(`${baseUrl}/api/claims/received`, { headers: { Cookie: owner.cookie } });
+    assert.equal(received.status, 200);
+    const receivedBody = await received.json();
+    assert.equal(receivedBody.claims.length, 1);
+    assert.equal(receivedBody.claims[0].claimant_name, claimant.profile.nickname);
 
     const ownerReply = await fetch(`${baseUrl}/api/claims/${claim.id}/messages`, {
       method: 'POST',

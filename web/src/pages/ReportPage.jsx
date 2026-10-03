@@ -2,7 +2,7 @@ import { ArrowLeft, ImagePlus, Info, Send } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import FormField from '../components/FormField.jsx';
-import { BUILDINGS, CATEGORIES, ROOMS_BY_BUILDING } from '../constants/appData.js';
+import { BUILDINGS, CATEGORIES, CUSTOM_ROOM_VALUE, ROOMS_BY_BUILDING } from '../constants/appData.js';
 import { api } from '../services/api.js';
 
 const emptyForm = {
@@ -13,12 +13,19 @@ const emptyForm = {
 export default function ReportPage() {
   const [form, setForm] = useState(emptyForm);
   const [files, setFiles] = useState([]);
+  const [areaChoice, setAreaChoice] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   function update(name, value) {
+    if (name === 'buildingCode') setAreaChoice('');
     setForm((current) => ({ ...current, [name]: value, ...(name === 'buildingCode' ? { room: '' } : {}) }));
+  }
+
+  function updateArea(value) {
+    setAreaChoice(value);
+    update('room', value === CUSTOM_ROOM_VALUE ? '' : value);
   }
 
   async function submit(event) {
@@ -65,9 +72,10 @@ export default function ReportPage() {
 
             <div className="form-section"><h2>สถานที่และเวลา</h2>
               <div className="form-row">
-                <FormField label="ตึก" required><select value={form.buildingCode} onChange={(event) => update('buildingCode', event.target.value)}>{BUILDINGS.map((building) => <option key={building.code} value={building.code}>{building.code} — {building.name}</option>)}</select></FormField>
-                <FormField label="ห้องหรือบริเวณ" required><select value={form.room} onChange={(event) => update('room', event.target.value)} required><option value="">เลือกบริเวณ</option>{ROOMS_BY_BUILDING[form.buildingCode].map((room) => <option key={room}>{room}</option>)}</select></FormField>
+                <FormField label="สถานที่หลัก" required><select value={form.buildingCode} onChange={(event) => update('buildingCode', event.target.value)}>{BUILDINGS.map((building) => <option key={building.code} value={building.code}>{building.code} — {building.name}</option>)}</select></FormField>
+                <FormField label="ห้องหรือบริเวณ" required><select value={areaChoice} onChange={(event) => updateArea(event.target.value)} required><option value="">เลือกห้องหรือบริเวณ</option>{ROOMS_BY_BUILDING[form.buildingCode].map((room) => <option key={room} value={room === 'ระบุห้องหรือบริเวณเอง' ? CUSTOM_ROOM_VALUE : room}>{room}</option>)}</select></FormField>
               </div>
+              {areaChoice === CUSTOM_ROOM_VALUE && <FormField label="ระบุห้องหรือบริเวณ" hint="เช่น ห้อง ICT 1107, หน้าร้านค้า หรือหมายเลขรถโดยสาร" required><input value={form.room} onChange={(event) => update('room', event.target.value)} maxLength="100" placeholder="พิมพ์สถานที่ให้ชัดเจน" required /></FormField>}
               <FormField label={form.reportType === 'LOST' ? 'วันที่คาดว่าทำหาย' : 'วันที่พบ'} required><input type="datetime-local" value={form.eventDate} max={new Date().toISOString().slice(0, 16)} onChange={(event) => update('eventDate', event.target.value)} required /></FormField>
             </div>
 

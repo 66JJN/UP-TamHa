@@ -5,7 +5,7 @@ UP TamHa is a lost-and-found centre for University of Phayao. It replaces short-
 ## Core journey
 
 1. A student creates an account with a nickname, unique username, and password, then can optionally upload a profile image.
-2. The student selects ICT, CE, PKY, UB, UP Dome, or Phaya Ngam Mueang Auditorium, followed by a room or shared area.
+2. The student selects a teaching building or campus area such as the library, canteen, university bus, road, outdoor space, dormitory, sports area, or Ang Luang, followed by a suggested area or a custom room/location.
 3. Other students search and filter the public feed.
 4. A potential owner submits private proof through a claim request.
 5. The claimant and reporter can reply privately before the reporter approves or rejects the claim and marks the item as returned.

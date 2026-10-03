@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { requireProfile } from '../middleware/profile.js';
 import { asyncRoute, AppError } from '../lib/errors.js';
 import {
-  createClaim, listClaimsByProfile, listClaimsForItem, reviewClaim, sendClaimMessage,
+  createClaim, listClaimsByProfile, listClaimsForItem, listClaimsForOwnedItems, reviewClaim, sendClaimMessage,
 } from '../repositories/appRepository.js';
 import { uuidPattern } from './itemRoutes.js';
 
@@ -15,6 +15,10 @@ function assertUuid(value) {
 
 router.get('/mine', asyncRoute(async (req, res) => {
   res.json({ claims: await listClaimsByProfile(req.profile.id) });
+}));
+
+router.get('/received', asyncRoute(async (req, res) => {
+  res.json({ claims: await listClaimsForOwnedItems(req.profile.id) });
 }));
 
 router.get('/item/:itemId', asyncRoute(async (req, res) => {
