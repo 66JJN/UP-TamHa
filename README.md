@@ -25,6 +25,8 @@ UP-TamHa/
 └── .github/   Azure deployment workflows
 ```
 
+ดู [Cloud Architecture Overview](docs/ARCHITECTURE.md) สำหรับแผนภาพระบบ บริการ Azure และขั้นตอน CI/CD
+
 ## เริ่มต้นใช้งาน
 
 ต้องมี Node.js 22
